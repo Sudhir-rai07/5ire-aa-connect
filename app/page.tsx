@@ -65,48 +65,59 @@ export default function Home() {
    */
   const fetchBalance = useCallback(
     async (address: string) => {
+      if (!publicClient) return;
+
       try {
-        const balanceResponse = await publicClient?.getBalance({
+        const balanceResponse = await publicClient.getBalance({
           address: address as `0x${string}`,
         });
 
-        if (balanceResponse) {
-          const balanceInEther = formatEther(balanceResponse);
-          setBalance(formatBalance(balanceInEther));
-        } else {
-          console.error("Balance response is undefined");
-          setBalance("0.0");
-        }
+        const balanceInEther = balanceResponse
+          ? formatEther(balanceResponse)
+          : "0.0";
+        setBalance(formatBalance(balanceInEther));
       } catch (error) {
         console.error("Error fetching balance:", error);
+        setBalance("0.0");
       }
     },
     [publicClient]
   );
 
-  /**
-   * Loads the user's account data such as address, balance, and user info.
-   */
-  useEffect(() => {
-    const loadAccountData = async () => {
+  const fetchUserInfo = useCallback(async () => {
+    if (typeof getUserInfo === "function") {
       try {
-        if (isConnected && smartAccount) {
-          const address = await smartAccount.getAddress();
-          setUserAddress(address);
-          fetchBalance(address);
-        }
-
-        if (isConnected && typeof getUserInfo === "function") {
-          const info = getUserInfo();
+        console.log(typeof getUserInfo);
+        const info = getUserInfo(); // Await ensures we get actual data
+        if (info) {
           setUserInfo(info);
+        } else {
+          console.warn("getUserInfo returned null or undefined.");
         }
+      } catch (error) {
+        console.warn("getUserInfo failed:", error);
+      }
+    } else {
+      console.warn("Skipping getUserInfo: Function is not available.");
+    }
+  }, [getUserInfo]);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        if (!isConnected || !smartAccount) return;
+
+        const address = await smartAccount.getAddress();
+        setUserAddress(address);
+
+        await Promise.all([fetchBalance(address), fetchUserInfo()]); // Fetch both in parallel
       } catch (error) {
         console.error("Error loading account data:", error);
       }
     };
 
-    loadAccountData();
-  }, [isConnected, smartAccount, getUserInfo, chainId, fetchBalance]);
+    loadUserData();
+  }, [isConnected, smartAccount, fetchBalance, fetchUserInfo, chainId]);
 
   /**
    * Handles the on-ramp process by opening the Particle Network Ramp in a new window.
