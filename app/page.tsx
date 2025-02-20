@@ -22,6 +22,7 @@ import {
 import { AAWrapProvider, SendTransactionMode } from "@particle-network/aa"; // Only needed with Eip1193 provider
 import { ethers, type Eip1193Provider } from "ethers";
 import { formatEther, parseEther } from "viem";
+import Link from "next/link";
 
 export default function Home() {
   const { isConnected, chainId, isConnecting, isDisconnected, chain } =
@@ -43,20 +44,20 @@ export default function Home() {
   const connectionStatus = isConnecting
     ? "Connecting..."
     : isConnected
-    ? "Connected"
-    : isDisconnected
-    ? "Disconnected"
-    : "Unknown";
+      ? "Connected"
+      : isDisconnected
+        ? "Disconnected"
+        : "Unknown";
 
   // Init custom provider with gasless transaction mode
   const customProvider = smartAccount
     ? new ethers.BrowserProvider(
-        new AAWrapProvider(
-          smartAccount,
-          SendTransactionMode.Gasless
-        ) as Eip1193Provider,
-        "any"
-      )
+      new AAWrapProvider(
+        smartAccount,
+        SendTransactionMode.Gasless
+      ) as Eip1193Provider,
+      "any"
+    )
     : null;
 
   /**
@@ -200,6 +201,17 @@ export default function Home() {
           Status: {connectionStatus}
         </h2>
       </div>
+
+      <div className="flex justify-center">
+        <Link
+          href="/fundraiser"
+          className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md 
+               hover:bg-blue-600 transition-all duration-300 ease-in-out"
+        >
+          Donate
+        </Link>
+      </div>
+
       {isConnected ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
