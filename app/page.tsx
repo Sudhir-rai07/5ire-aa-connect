@@ -9,6 +9,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { formatBalance, truncateAddress, copyToClipboard } from "@/utils/utils";
 import TxNotification from "@/components/TxNotification";
 
+import abis from '../app/abis/Factory.json'
+
 // Particle imports
 import {
   ConnectButton,
@@ -21,8 +23,9 @@ import {
 // Eip1193 and AA Provider
 import { AAWrapProvider, SendTransactionMode } from "@particle-network/aa"; // Only needed with Eip1193 provider
 import { ethers, type Eip1193Provider } from "ethers";
-import { formatEther, parseEther } from "viem";
+import { custom, formatEther, parseEther } from "viem";
 import Link from "next/link";
+import { CONTRACT_ADDRESS, fundraiserContract } from "./constants/constants";
 
 export default function Home() {
   const { isConnected, chainId, isConnecting, isDisconnected, chain } =
@@ -36,9 +39,11 @@ export default function Home() {
   const [userAddress, setUserAddress] = useState<string>("");
   const [userInfo, setUserInfo] = useState<Record<string, any> | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
-  const [recipientAddress, setRecipientAddress] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
+  const [donations, setDonations] = useState<string>("")
+  const [donors, setDonors] = useState<string[]>([])
 
   // Connection status message based on the account's connection state
   const connectionStatus = isConnecting
@@ -128,41 +133,93 @@ export default function Home() {
     window.open(onRampUrl, "_blank");
   };
 
+  // Fetch Donations
+  const fetchDonationBalance = async () => {
+    if (!customProvider) {
+      console.log("Custom provider not found")
+      return
+    }
+
+    try {
+      const signer = await customProvider.getSigner();
+      const fundraiser = await fundraiserContract(signer)
+      const donation = await fundraiser.getBalance();
+      setDonations(ethers.formatEther(donation))
+    } catch (error) {
+      console.log("Could not fetch balance : ", error)
+    }
+  }
+
+  useEffect(() => {
+    if (!customProvider) return;
+    fetchDonationBalance()
+  }, [customProvider])
+
+
   /**
    * Sends a transaction using the native AA Particle provider with gasless mode.
    */
-  const executeTxNative = async () => {
-    setIsSending(true);
-    try {
-      const tx = {
-        to: recipientAddress,
-        value: parseEther("0.01").toString(),
-        data: "0x",
-      };
+  // const executeTxNative = async () => {
+  //   if (!customProvider || !smartAccount) {
+  //     console.error("Custom provider or smart account is missing");
+  //     return;
+  //   }
 
-      // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
-      const feeQuotesResult = await smartAccount?.getFeeQuotes(tx);
-      const { userOp, userOpHash } =
-        feeQuotesResult?.verifyingPaymasterGasless || {};
+  //   try {
+  //     setIsSending(true);
 
-      if (userOp && userOpHash) {
-        const txHash =
-          (await smartAccount?.sendUserOperation({
-            userOp,
-            userOpHash,
-          })) || null;
+  //     const signer = await customProvider.getSigner();
+  //     const fundraiser = await fundraiserContract(signer)
 
-        setTransactionHash(txHash);
-        console.log("Transaction sent:", txHash);
-      } else {
-        console.error("User operation is undefined");
-      }
-    } catch (error) {
-      console.error("Failed to send transaction:", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
+  //     console.log("Fetching contract balance...");
+  //     const balance = await fundraiser.getBalance();
+  //     console.log("BAL:", ethers.formatEther(balance), "5ire");
+
+
+  //     if (!amount || isNaN(Number(amount))) {
+  //       console.error("Invalid amount provided");
+  //       alert("Enter a valid donation amount.");
+  //       setIsSending(false);
+  //       return;
+  //     }
+
+  //     // Create transaction request
+  //    const tx = await fundraiser.donate({value: ethers.parseEther(amount)})
+  //     console.log("Fetching fee quotes...");
+  //     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+
+  //     if (!feeQuotesResult || !feeQuotesResult.verifyingPaymasterGasless) {
+  //       console.error("Gasless fee quote not available");
+  //       alert("Gasless transaction not supported.");
+  //       setIsSending(false);
+  //       return;
+  //     }
+
+  //     const { userOp, userOpHash } = feeQuotesResult.verifyingPaymasterGasless;
+
+  //     if (!userOp || !userOpHash) {
+  //       console.error("User operation is undefined");
+  //       setIsSending(false);
+  //       return;
+  //     }
+
+  //     console.log("Signing and sending transaction...");
+  //     const txHash = await smartAccount.sendUserOperation({ userOp, userOpHash });
+
+  //     if (txHash) {
+  //       setTransactionHash(txHash);
+  //       console.log("Transaction sent successfully:", txHash);
+  //     } else {
+  //       console.error("Failed to send transaction.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to send transaction:", error);
+  //   } finally {
+  //     setIsSending(false);
+  //   }
+  // };
+
+
 
   /**
    * Sends a transaction using the ethers.js library.
@@ -172,23 +229,65 @@ export default function Home() {
     if (!customProvider) return;
 
     const signer = await customProvider.getSigner();
+    console.log(signer, "Signer")
     setIsSending(true);
+
+    const fundraiserContract = new ethers.Contract(CONTRACT_ADDRESS, abis, signer)
+
     try {
-      const tx = {
-        to: recipientAddress,
-        value: parseEther("0.01").toString(),
-      };
+      const tx = await fundraiserContract.donate({
+        value: ethers.parseEther(amount),
+        gasLimit: 300000,
+      });
+      console.log(tx, "TX")
+      setTransactionHash(tx?.hash || null);
 
-      const txResponse = await signer.sendTransaction(tx);
-      const txReceipt = await txResponse.wait();
-
-      setTransactionHash(txReceipt?.hash || null);
+      await fetchDonationBalance()
     } catch (error) {
       console.error("Failed to send transaction using ethers.js:", error);
     } finally {
       setIsSending(false);
     }
   };
+
+
+  const withdrawFunds = async () => {
+    if (!customProvider) {
+      console.log("Custom provider not found")
+      return
+    }
+    try {
+      const signer = await customProvider.getSigner()
+      const fundraiser = await fundraiserContract(signer)
+      console.log("Withdrawing...")
+      await fundraiser.withdraw()
+      console.log("Withdrawn")
+    } catch (error) {
+      console.log("Could not withdraw", error)
+    }
+  }
+
+  const getDonors = async () => {
+    if (!customProvider) {
+      console.log("Custom provider not found")
+      return
+    }
+
+    try {
+      const signer = await customProvider.getSigner()
+      const fundraiser = await fundraiserContract(signer)
+      const donors = await fundraiser.getDonors()
+      setDonors(donors)
+      console.log(donors)
+    } catch (error) {
+      console.log("Could not get donors : ", error)
+    }
+  }
+
+  useEffect(()=>{
+    if(!customProvider) return
+    getDonors()
+  }, [customProvider])
 
   return (
     <div className="container min-h-screen flex flex-col justify-center items-center mx-auto gap-4">
@@ -202,18 +301,17 @@ export default function Home() {
         </h2>
       </div>
 
-      <div className="flex justify-center">
-        <Link
-          href="/fundraiser"
-          className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md 
-               hover:bg-blue-600 transition-all duration-300 ease-in-out"
-        >
-          Donate
-        </Link>
-      </div>
+
 
       {isConnected ? (
         <>
+
+          <div className="bg-white cursor-pointer text-black transition-colors hover:text-blue-500 px-4 py-2 rounded-md">
+            Total raised fund : {donations} 5IRE
+          </div>
+
+          <button className="bg-green-100 text-green-700 px-4 py-2 rounded-md" onClick={withdrawFunds}>WithdrawFunds</button>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="border border-purple-500 p-6 rounded-lg">
               {userInfo && (
@@ -253,46 +351,39 @@ export default function Home() {
                   🔄
                 </button>
               </h2>
-              <button
-                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
-                onClick={handleOnRamp}
-              >
-                Buy Crypto with Fiat
-              </button>
             </div>
 
             <div className="border border-purple-500 p-6 rounded-lg">
               <h2 className="text-2xl font-bold mb-2 text-white">
                 Send a gasless transaction
               </h2>
-              <h2 className="text-lg">
-                Send 0.01 {chain?.nativeCurrency.symbol}
-              </h2>
               <input
                 type="text"
-                placeholder="Recipient Address"
-                value={recipientAddress}
-                onChange={(e) => setRecipientAddress(e.target.value)}
+                placeholder="Enter amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 className="mt-4 p-2 w-full rounded border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
+
               <button
-                className="mr-4 mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
-                onClick={executeTxNative}
-                disabled={!recipientAddress || isSending}
-              >
-                {isSending
-                  ? "Sending..."
-                  : `Send 0.01 ${chain?.nativeCurrency.symbol} Particle provider`}
-              </button>
-              <button
-                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+                className="mt-4 bg-purple-600 mr-4 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
                 onClick={executeTxEthers}
-                disabled={!recipientAddress || isSending}
+                disabled={!amount || isSending}
               >
                 {isSending
                   ? "Sending..."
-                  : `Send 0.01 ${chain?.nativeCurrency.symbol} ethers`}
+                  : `Donate ${chain?.nativeCurrency.symbol} ethers`}
               </button>
+
+              {/* <button
+                className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+                onClick={executeTxNative}
+                disabled={!amount || isSending}
+              >
+                {isSending
+                  ? "Sending..."
+                  : `Donate ${chain?.nativeCurrency.symbol} Native`}
+              </button> */}
               {transactionHash && (
                 <TxNotification
                   hash={transactionHash}
@@ -301,7 +392,34 @@ export default function Home() {
               )}
             </div>
           </div>
-          <LinksGrid />
+          {/* <LinksGrid /> */}
+
+          <h2 className="text-xl mt-6">Donors</h2>
+          <table className="w-full border-collapse border border-gray-300 mt-4">
+            <thead>
+              <tr className="text-green-500 text-lg">
+                <th className="border px-4 py-2">#</th>
+                <th className="border px-4 py-2">Donor Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {donors.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="text-center border px-4 py-2">
+                    No donors yet.
+                  </td>
+                </tr>
+              ) : (
+                donors.map((donor, index) => (
+                  <tr key={index}>
+                    <td className="border px-4 py-2">{index + 1}</td>
+                    <td className="border px-4 py-2">{donor}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
           <ToastContainer />
         </>
       ) : (

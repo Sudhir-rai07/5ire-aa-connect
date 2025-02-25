@@ -1,15 +1,23 @@
+const { error } = require("console");
 const hre = require("hardhat");
 
 async function main() {
-  const Fundraiser = await hre.ethers.getContractFactory("Fundraiser");
-  const fundraiser = await Fundraiser.deploy("0xDA8F0764C6c079a12BE61A8f971F7145c79841e9");
+const [deployer] = await hre.ethers.getSigners();
+console.log("Deploying contract with account: ", deployer.address)
 
-  await fundraiser.waitForDeployment();
-  console.log("Fundraiser deployed to:", fundraiser.target);
-  //Contract Deployed On : 0x279636B044B83B9a6f4949eCFfE849a9cdc5E81f
+const Fundraiser = await hre.ethers.getContractFactory("Fundraiser")
+const fundraiser = await Fundraiser.deploy(deployer.address)
+await fundraiser.waitForDeployment();
+
+console.log("Fundraiser deployed at : ", await fundraiser.getAddress())
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+      .then(()=> process.exit(0))
+      .catch((err)=> {
+          console.log(error)
+          process.exit(1)
+        })
+
+
+        // 0x2890Fc3166eb890fd1Aa9aC13cF6b10B04bD2787

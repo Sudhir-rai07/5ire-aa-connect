@@ -1,68 +1,50 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Fundraiser is Ownable {
-    using SafeERC20 for IERC20;
 
-    struct Donation {
-        uint256 totalAmount;
-        bool exists;
-    }
+    mapping(address => uint256) public donations;
+    address[] public donors;
+    mapping(address => bool) private hasDonated;
 
-    mapping(address => mapping(address => Donation)) private donations; 
-    address[] private donors;
-    mapping(address => bool) private donorExists;
+    event DonationReveived(address indexed _donor, uint256 _amount);
+    event FundsWithdrawn(address indexed _owner, uint256 _amount);
+        
+    constructor(address owner) Ownable(owner) { } // Constructor to set the owner address) {}
 
-    event DonationReceived(
-        address indexed donor,
-        address indexed token,
-        uint256 amount
-    );
-    event FundsWithdrawn(
-        address indexed owner,
-        address indexed token,
-        uint256 amount
-    );
 
-    constructor(address owner) Ownable(owner) {}
+    // Donte native token
+    function donate() external payable {
+        require(msg.value > 0, "Donation must be greater than 0");
+        donations[msg.sender] += msg.value;
 
-    function donate(address token, uint256 amount) external {
-        require(amount > 0, "Amount must be greater than 0");
-
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-
-        if (!donations[msg.sender][token].exists) {
-            donations[msg.sender][token].exists = true;
-        }
-        donations[msg.sender][token].totalAmount += amount;
-
-        if (!donorExists[msg.sender]) {
-            donorExists[msg.sender] = true;
+        if(!hasDonated[msg.sender]){
+            hasDonated[msg.sender] = true;
             donors.push(msg.sender);
         }
 
-        emit DonationReceived(msg.sender, token, amount);
+        emit DonationReveived(msg.sender, msg.value);
     }
 
-    function withdraw(address token) external onlyOwner {
-        uint256 amount = IERC20(token).balanceOf(address(this));
-        require(amount > 0, "No funds to withdraw");
+    // Withdraw funds: onlyOwner
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
 
-        IERC20(token).safeTransfer(owner(), amount);
-        emit FundsWithdrawn(owner(), token, amount);
+        (bool success,) = owner().call{value: balance}("");
+        require(success, "Withdraw Failed");
+        emit  FundsWithdrawn(owner(), balance);
     }
 
-    function getDonors() external view returns (address[] memory) {
+    // Get donors
+    function getDonors() external view returns(address[] memory){
         return donors;
     }
 
-    function getDonation(
-        address donor,
-        address token
-    ) external view returns (uint256) {
-        return donations[donor][token].totalAmount;
+    function getBalance() public view returns(uint256){
+        return address(this).balance;
     }
+   
 }
