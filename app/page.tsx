@@ -352,7 +352,7 @@ export default function Home() {
 
 
   return (
-    <div className="container min-h-screen flex flex-col justify-center items-center mx-auto gap-4">
+    <div className="container min-h-screen flex  flex-col justify-center items-center mx-auto gap-4">
       <div className="absolute top-6 right-6">
         <ConnectButton label="Click to login" />
       </div>
@@ -372,10 +372,10 @@ export default function Home() {
             Total raised fund : {donations} 5IRE
           </div>
 
-          <button className="bg-green-100 text-green-700 px-4 py-2 rounded-md" onClick={withdrawWithMetamask}>WithdrawFunds</button>
+         {process.env.OWNER === userAddress && <button className="bg-green-500 text-black px-4 py-2 rounded-md " onClick={withdrawWithMetamask}>WithdrawFunds</button>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="border border-purple-500 p-6 rounded-lg">
+            <div className="border border-[#00a9dce9] p-6 rounded-lg">
               {userInfo && (
                 <div className="flex items-center">
                   <h2 className="text-lg font-semibold text-white mr-2">
@@ -394,7 +394,7 @@ export default function Home() {
                 Address:{" "}
                 <code>{truncateAddress(userAddress) || "Loading..."}</code>
                 <button
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-2 ml-2 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center"
+                  className="bg-[#00a9dce9] hover:bg-[#00a9dce9] text-white font-bold py-1 px-2 ml-2 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center"
                   onClick={() => copyToClipboard(userAddress)}
                 >
                   📋
@@ -407,7 +407,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold mb-2 text-white flex items-center">
                 Balance: {balance || "Loading..."}
                 <button
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-2 ml-2 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center"
+                  className="bg-[#00a9dce9] hover:bg-[#00a9dce9] text-white font-bold py-1 px-2 ml-2 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center"
                   onClick={() => fetchBalance(userAddress)}
                 >
                   🔄
@@ -415,20 +415,20 @@ export default function Home() {
               </h2>
             </div>
 
-            <div className="border border-purple-500 p-6 rounded-lg">
+            <div className="border border-[#00a9dce9]  p-6 rounded-lg">
               <h2 className="text-2xl font-bold mb-2 text-white">
-                Send a gasless transaction
+                Donate Transaction
               </h2>
               <input
                 type="text"
                 placeholder="Enter amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="mt-4 p-2 w-full rounded border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="mt-4 p-2 w-full py-2 border hover:border-[#00a4ff] border-none rounded-lg bg-[#06112b] text-white focus:outline-none focus:ring-2 hover:ring-[#00a4ff] focus:ring-[#00a4ff] ring-[#00a6ff78] ring-2"
               />
 
               <button
-                className="mt-4 bg-purple-600 mr-4 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+                className="mt-4 bg-[#00A7DC] mr-4 hover:bg-[#00a9dce9] text-white transition-colors font-bold py-2 px-4 rounded  duration-300 ease-in-out transform transition-all hover:scale-105 shadow-lg"
                 onClick={executeTxEthers}
                 disabled={!amount || isSending}
               >
@@ -457,7 +457,7 @@ export default function Home() {
           {/* <LinksGrid /> */}
 
           <h2 className="text-xl mt-6">Donors</h2>
-          <button onClick={getDonors} className="text-sm text-gray-300">Click to get all donors</button>
+          <hr  className="h-[2px] border-none w-full bg-gray-400 py-0"/>
           <table className="w-full border-collapse border border-gray-300 mt-4">
                 <thead>
                     <tr className="text-green-500 text-lg">
@@ -478,7 +478,7 @@ export default function Home() {
                     {donors.length>0 && (
                       donors.map((donor, index) => (
                         <tr key={index}>
-                            <td className="border px-4 py-2">{index + 1}</td>
+                            <td className="border px-4">{index + 1}</td>
                             <td className="border px-4 py-2">{donor.address}</td>
                             <td className="border px-4 py-2">{donor.amount}</td>
                         </tr>
