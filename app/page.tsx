@@ -26,6 +26,12 @@ import { ethers, type Eip1193Provider } from "ethers";
 import { custom, formatEther, parseEther } from "viem";
 import Link from "next/link";
 import { CONTRACT_ADDRESS, fundraiserContract } from "./constants/constants";
+import { Contract } from "ethers";
+
+type Donor = {
+  address: string,
+  amount: string
+}
 
 export default function Home() {
   const { isConnected, chainId, isConnecting, isDisconnected, chain } =
@@ -43,7 +49,7 @@ export default function Home() {
   const [isSending, setIsSending] = useState<boolean>(false);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [donations, setDonations] = useState<string>("")
-  const [donors, setDonors] = useState<string[]>([])
+  const [donors, setDonors] = useState<Donor[]>([])
 
   // Connection status message based on the account's connection state
   const connectionStatus = isConnecting
@@ -93,7 +99,6 @@ export default function Home() {
   const fetchUserInfo = useCallback(async () => {
     if (typeof getUserInfo === "function") {
       try {
-        console.log(typeof getUserInfo);
         const info = getUserInfo(); // Await ensures we get actual data
         if (info) {
           setUserInfo(info);
@@ -150,12 +155,47 @@ export default function Home() {
     }
   }
 
+
+
+  const getDonors = useCallback(async () => {
+    if (!customProvider) {
+      console.log("Custom provider not found");
+      return;
+    }
+  
+    try {
+      const signer = await customProvider.getSigner();
+      const fundraiser = await fundraiserContract(signer);
+      const donorAddresses = await fundraiser.getDonors();
+  
+      const donorList: Donor[] = await Promise.all(
+        donorAddresses.map(async (address: string) => {
+          const amount = await fundraiser.donations(address);
+          return { address, amount: ethers.formatEther(amount) };
+        })
+      );
+  
+      setDonors(donorList);
+      console.log(donorList);
+    } catch (error) {
+      console.log("Could not get donors: ", error);
+    }
+  }, [donations]); // No dependencies, ensuring it doesn't cause an infinite loop
+  
+
+  
+  
+
   useEffect(() => {
     if (!customProvider) return;
     fetchDonationBalance()
   }, [customProvider])
 
-
+  
+  useEffect(()=>{
+    if(!customProvider) return
+    getDonors()
+  },[donations])
   /**
    * Sends a transaction using the native AA Particle provider with gasless mode.
    */
@@ -267,27 +307,49 @@ export default function Home() {
     }
   }
 
-  const getDonors = async () => {
-    if (!customProvider) {
-      console.log("Custom provider not found")
+  async function connectWallet() {
+    if(!window.ethereum){
+      console.log("Metamask is not installed")
       return
     }
 
     try {
-      const signer = await customProvider.getSigner()
-      const fundraiser = await fundraiserContract(signer)
-      const donors = await fundraiser.getDonors()
-      setDonors(donors)
-      console.log(donors)
+      await window.ethereum.request({method: "eth_requestAccounts"})
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner();
+
+      console.log("Connected :", await signer.getAddress())
+
+      return signer
     } catch (error) {
-      console.log("Could not get donors : ", error)
+      console.log("User denied account access: ", error)
     }
   }
 
-  useEffect(()=>{
-    if(!customProvider) return
-    getDonors()
-  }, [customProvider])
+    const withdrawWithMetamask = async () =>{
+      const signer = await connectWallet();
+      if(!signer){
+        console.log("Signer not found")
+        return
+      }
+
+    try {
+        const fundraiser = await fundraiserContract(signer)
+        await fundraiser.withdraw()
+    } catch (error) {
+      console.log("ERROR: ", error)
+
+      // Extract revert reason
+    if (error?.reason) {
+      alert("Error: " + error.reason); // Show user-friendly error
+    } else {
+      alert("Transaction failed. Check console for details.");
+    }
+    }
+    }
+
+
+
 
   return (
     <div className="container min-h-screen flex flex-col justify-center items-center mx-auto gap-4">
@@ -310,7 +372,7 @@ export default function Home() {
             Total raised fund : {donations} 5IRE
           </div>
 
-          <button className="bg-green-100 text-green-700 px-4 py-2 rounded-md" onClick={withdrawFunds}>WithdrawFunds</button>
+          <button className="bg-green-100 text-green-700 px-4 py-2 rounded-md" onClick={withdrawWithMetamask}>WithdrawFunds</button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="border border-purple-500 p-6 rounded-lg">
@@ -395,35 +457,40 @@ export default function Home() {
           {/* <LinksGrid /> */}
 
           <h2 className="text-xl mt-6">Donors</h2>
+          <button onClick={getDonors} className="text-sm text-gray-300">Click to get all donors</button>
           <table className="w-full border-collapse border border-gray-300 mt-4">
-            <thead>
-              <tr className="text-green-500 text-lg">
-                <th className="border px-4 py-2">#</th>
-                <th className="border px-4 py-2">Donor Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {donors.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="text-center border px-4 py-2">
-                    No donors yet.
-                  </td>
-                </tr>
-              ) : (
-                donors.map((donor, index) => (
-                  <tr key={index}>
-                    <td className="border px-4 py-2">{index + 1}</td>
-                    <td className="border px-4 py-2">{donor}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                <thead>
+                    <tr className="text-green-500 text-lg">
+                        <th className="border px-4 py-2">#</th>
+                        <th className="border px-4 py-2">Donor Address</th>
+                        <th className="border px-4 py-2">Donation Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {donors.length == 0 && (
+                        <tr>
+                            <td colSpan={3} className="text-center border px-4 py-2">
+                                No donors yet.
+                            </td>
+                        </tr>
+                    )
+                  }
+                    {donors.length>0 && (
+                      donors.map((donor, index) => (
+                        <tr key={index}>
+                            <td className="border px-4 py-2">{index + 1}</td>
+                            <td className="border px-4 py-2">{donor.address}</td>
+                            <td className="border px-4 py-2">{donor.amount}</td>
+                        </tr>
+                    ))
+                    )}
+                </tbody>
+            </table>
 
           <ToastContainer />
         </>
       ) : (
-        <LinksGrid />
+        <></>
       )}
     </div>
   );
