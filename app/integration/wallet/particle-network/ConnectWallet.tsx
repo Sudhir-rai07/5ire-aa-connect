@@ -355,8 +355,8 @@ export default function Home() {
 
             <p className="paragraph mt-8">
                 That concludes the brief introduction to Particle&apos;s Smart Wallet-as-a-Service stack and how to get started with Particle on 5ireChain. For more information, you can check out Particle Network&apos;s <Link className='underline text-blue-500' href={"https://developers.particle.network/landing/introduction"}>documentation.</Link>
-                <p className="paragraph mt-6">Find the repository with the complete code implementation on the Particle Network GitHub.</p>
             </p>
+                <p className="paragraph mt-6">Find the repository with the complete code implementation on the Particle Network GitHub.</p>
         </div>
     )
 }
