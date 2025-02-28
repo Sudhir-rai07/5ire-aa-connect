@@ -82,7 +82,7 @@ const Configuration = () => {
             </SyntaxHighlighter>
 
             <p className="paragraph">
-                This setup initializes ParticleConnectKit, a wrapper for the configured ConnectKitProvider instance, using your project keys. It also defines essential SDK settings, such as supported chains (e.g., Moonbeam), wallet positioning and visibility options, and a SIMPLE smart account instance.
+                This setup initializes ParticleConnectKit, a wrapper for the configured ConnectKitProvider instance, using your project keys. It also defines essential SDK settings, such as supported chains (e.g., 5ireChain), wallet positioning and visibility options, and a SIMPLE smart account instance.
             </p>
 
             <p className="paragraph">
