@@ -346,7 +346,7 @@ export default function Home() {
             </p>
 
             <p className='paragraph'>
-                Specifically, this application creates a smart account on Moonbeam MainNet through social login, then uses it to send a gasless transaction of 0.001 GLMR with the ethers provider.
+                Specifically, this application creates a smart account on 5ireChain MainNet through social login, then uses it to send a gasless transaction of 0.001 GLMR with the ethers provider.
             </p>
 
             <SyntaxHighlighter language='javascript' style={dracula}>
@@ -354,7 +354,7 @@ export default function Home() {
             </SyntaxHighlighter>
 
             <p className="paragraph mt-8">
-                That concludes the brief introduction to Particle&apos;s Smart Wallet-as-a-Service stack and how to get started with Particle on Moonbeam. For more information, you can check out Particle Network&apos;s <Link className='underline text-blue-500' href={"https://developers.particle.network/landing/introduction"}>documentation.</Link>
+                That concludes the brief introduction to Particle&apos;s Smart Wallet-as-a-Service stack and how to get started with Particle on 5ireChain. For more information, you can check out Particle Network&apos;s <Link className='underline text-blue-500' href={"https://developers.particle.network/landing/introduction"}>documentation.</Link>
                 <p className="paragraph mt-6">Find the repository with the complete code implementation on the Particle Network GitHub.</p>
             </p>
         </div>
