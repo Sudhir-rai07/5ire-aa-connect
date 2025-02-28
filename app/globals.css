@@ -25,4 +25,8 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .paragraph{
+    @apply text-gray-300 mb-6;
+  }
 }
