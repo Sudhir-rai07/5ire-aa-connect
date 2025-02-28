@@ -51,27 +51,27 @@ const ParticleIntegration = () => {
           <li className="mb-6">
             <p className="mb-2 text-white">Navigate to the <Link className='text-blue-500 underline' href={"https://dashboard.particle.network/"}>Particle Network Dashboard</Link></p>
             <p>Sign up or log in to the Particle Network dashboard.</p>
-            <img className="w-[90%] lg:w-[80%] mt-4 rounded-lg shadow-md" src="/GetStarted.png" alt="Get Started" />
+            <img className="w-[90%] lg:w-[100%] mt-4 rounded-lg shadow-md" src="/GetStarted.png" alt="Get Started" />
           </li>
           <li className="mb-6">
             <p className="mb-2 text-white">Create a New Project</p>
             <p>Once logged in, click <strong>Add New Project</strong> to create a new project.</p>
-            <img className="w-[90%] lg:w-[80%] mt-4 rounded-lg shadow-md" src="/DashboardPage.png" alt="Dashboard Page" />
+            <img className="w-[90%] lg:w-[100%] mt-4 rounded-lg shadow-md" src="/DashboardPage.png" alt="Dashboard Page" />
           </li>
           <li className="mb-6">
             <p className="mb-2 text-white">Enter Project Name</p>
             <p>Enter the project name and click <strong>Save</strong>.</p>
-            <img className="w-[90%] lg:w-[80%] mt-4 rounded-lg shadow-md" src="/ProjectName.png" alt="Project Name" />
+            <img className="w-[90%] lg:w-[100%] mt-4 rounded-lg shadow-md" src="/ProjectName.png" alt="Project Name" />
           </li>
           <li className="mb-6">
             <p className="mb-2 text-white">Create a New App</p>
             <p>From the project&apos;s dashboard, scroll down to the <strong>Your Apps</strong> section and create a new app by selecting <strong>iOS</strong>, <strong>Android</strong>, or <strong>Web</strong> and providing the requested information.</p>
-            <img className="w-[90%] lg:w-[80%] mt-4 rounded-lg shadow-md" src="/APIpage.png" alt="API Page" />
+            <img className="w-[90%] lg:w-[100%] mt-4 rounded-lg shadow-md" src="/APIpage.png" alt="API Page" />
           </li>
           <li className="mb-6">
             <p className="mb-2 text-white">Copy Credentials</p>
             <p>Finally, copy the <strong>Project ID</strong>, <strong>Client Key</strong>, and <strong>App ID</strong>.</p>
-            <img className="w-[90%] lg:w-[80%] mt-4 rounded-lg shadow-md" src="/APIpage.png" alt="API Page" />
+            <img className="w-[90%] lg:w-[100%] mt-4 rounded-lg shadow-md" src="/APIpage.png" alt="API Page" />
           </li>
         </ol>
       
