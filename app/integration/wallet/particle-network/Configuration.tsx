@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react'
 
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -53,7 +54,7 @@ const Configuration = () => {
             </p>
 
             <p className="paragraph">
-                Before proceeding, head back to the <a href="#" className="text-blue-500 underline">Particle dashboard</a> and retrieve the following API keys:
+                Before proceeding, head back to the <Link href="https://dashboard.particle.network/" className="text-blue-500 underline">Particle dashboard</Link> and retrieve the following API keys:
             </p>
 
             <p className="paragraph">
@@ -85,7 +86,7 @@ const Configuration = () => {
             </p>
 
             <p className="paragraph">
-                For further customization options, refer to the Particle Connect documentation.
+                For further customization options, refer to the <Link className='text-blue-500 underline' href={"https://developers.particle.network/api-reference/connect/desktop/web#configuration"}>Particle Connect documentation.</Link>
             </p>
 
             <p className="paragraph">

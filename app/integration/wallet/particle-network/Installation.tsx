@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -20,7 +21,7 @@ const Installation = () => {
   </div>
 
   <p className="text-gray-400 text-sm italic">
-    Note that this tutorial is based on a Next.js app with TypeScript and Tailwind CSS.
+    Note that this tutorial is based on a <Link className="underline text-blue-500" href={"https://nextjs.org/docs/app/getting-started/installation"}>Next.js</Link> app with TypeScript and Tailwind CSS.
   </p>
 </div>
   )

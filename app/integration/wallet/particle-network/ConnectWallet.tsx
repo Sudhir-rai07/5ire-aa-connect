@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
@@ -353,8 +354,8 @@ export default function Home() {
             </SyntaxHighlighter>
 
             <p className="paragraph mt-8">
-                That concludes the brief introduction to Particle&apos;s Smart Wallet-as-a-Service stack and how to get started with Particle on Moonbeam. For more information, you can check out Particle Network&apos;s documentation.
-                <p className="paragraph">Find the repository with the complete code implementation on the Particle Network GitHub.</p>
+                That concludes the brief introduction to Particle&apos;s Smart Wallet-as-a-Service stack and how to get started with Particle on Moonbeam. For more information, you can check out Particle Network&apos;s <Link className='underline text-blue-500' href={"https://developers.particle.network/landing/introduction"}>documentation.</Link>
+                <p className="paragraph mt-6">Find the repository with the complete code implementation on the Particle Network GitHub.</p>
             </p>
         </div>
     )

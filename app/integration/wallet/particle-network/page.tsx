@@ -3,6 +3,7 @@ import Installation from './Installation'
 import Configuration from './Configuration'
 import Integrate from './Integrate'
 import ConnectWallet from './ConnectWallet'
+import Link from 'next/link'
 
 const ParticleIntegration = () => {
     return (
@@ -12,11 +13,11 @@ const ParticleIntegration = () => {
         <h2 className="text-2xl font-semibold text-white mb-4">Introduction</h2>
       
         <p className="text-gray-300 mb-4">
-          <span className="font-medium">Particle Network</span> offers Wallet Abstraction services with an Account Abstraction stack, providing a suite of SDKs focused on reducing user onboarding friction.
+          <Link href={"https://particle.network/"} className="font-medium">Particle Network</Link> offers Wallet Abstraction services with an Account Abstraction stack, providing a suite of SDKs focused on reducing user onboarding friction.
         </p>
       
         <p className="text-gray-300 mb-4">
-          By embedding customizable Externally Owned Account (EOA) and Account Abstraction (AA) components, Particle allows quick 2-click onboarding via social logins like Google, email, and phone, as well as traditional Web3 methods. This approach removes the need for users to manage a conventional wallet, delivering a streamlined, application-specific experience for Web3 interactions.
+          By embedding customizable Externally Owned Account (EOA) and <Link href={"https://developers.particle.network/landing/introduction"} className='text-blue-500 underline'>Account Abstraction (AA)</Link>  components, Particle allows quick 2-click onboarding via social logins like Google, email, and phone, as well as traditional Web3 methods. This approach removes the need for users to manage a conventional wallet, delivering a streamlined, application-specific experience for Web3 interactions.
         </p>
       
         <h3 className="text-xl font-semibold text-white mb-4">
@@ -48,7 +49,7 @@ const ParticleIntegration = () => {
       
         <ol className="list-decimal pl-8 text-gray-300 mb-8">
           <li className="mb-6">
-            <p className="mb-2 text-white">Navigate to the Particle Network Dashboard</p>
+            <p className="mb-2 text-white">Navigate to the <Link className='text-blue-500 underline' href={"https://dashboard.particle.network/"}>Particle Network Dashboard</Link></p>
             <p>Sign up or log in to the Particle Network dashboard.</p>
             <img className="w-[90%] lg:w-[70%] mt-4 rounded-lg shadow-md" src="/GetStarted.png" alt="Get Started" />
           </li>
