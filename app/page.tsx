@@ -350,8 +350,11 @@ export default function Home() {
 
 
   return (
-    <div className="container min-h-screen flex  flex-col justify-center items-center mx-auto gap-4">
-      <div className="absolute top-6 right-6">
+    <div className="min-h-screen max-w-[1300px] w-full flex  flex-col items-center mx-auto gap-4">
+      <div className="flex justify-between items-center w-full py-8">
+        <Link href={"/integration/wallet/particle-network"} className="text-blue-500 hover:underline font-semibold">
+          Docs
+        </Link>
         <ConnectButton label="Click to login" />
       </div>
       <Header />
@@ -361,7 +364,7 @@ export default function Home() {
         </h2>
       </div>
 
-      <Link href={"/integration/wallet/particle-network"}>DOCS</Link>
+
 
 
       {isConnected ? (
